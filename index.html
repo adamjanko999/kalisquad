@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d130e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="KaliSquad - kalistenika s partou. Tréninky na hrazdách, jídlo, progres a žebříček s kámoši.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>KaliSquad - kalistenika s partou</title>
+<style>
+  :root{
+    --bg:#0d130e; --bg2:#131b13; --card:#18231a; --card2:#1f2e20;
+    --line:#2b3d2c; --txt:#ece4d4; --mut:#9cab94;
+    --acc:#8fc878; --acc2:#5f9e54; --accD:#3a5f37;
+    --wood:#b08358; --wood2:#d2a878;
+    --blue:#86aec2; --orange:#d99a5b; --red:#cf7a6b; --gold:#d9a441;
+    --r:18px; --rs:12px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px; line-height:1.45;}
+  body{padding-bottom:84px; min-height:100vh;
+    background:linear-gradient(180deg,#0d130e 0%,#10170f 60%,#121810 100%);}
+  #app{max-width:680px;margin:0 auto;padding:0 14px;}
+  @media(min-width:900px){ #app{max-width:760px} }
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(13,19,14,.93);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .hwrap{max-width:680px;margin:0 auto;padding:9px 14px;display:flex;align-items:center;gap:8px;}
+  @media(min-width:900px){ .hwrap{max-width:760px} }
+  .logo{font-weight:800;font-size:18px;letter-spacing:.3px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .logo span{color:var(--acc)}
+  .hstat{margin-left:auto;display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+  .flame{color:var(--orange)} .xpchip{color:var(--acc)}
+  .gear{background:none;border:none;font-size:19px;cursor:pointer;padding:2px}
+  .lvlbarWrap{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 14px;max-width:680px}
+  @media(min-width:900px){ .lvlbarWrap{max-width:760px;margin:0 auto} }
+  .lvlbar{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));width:0%;transition:width .5s}
+
+  /* ---------- nav ---------- */
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:rgba(13,19,14,.97);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);}
+  .nwrap{max-width:680px;margin:0 auto;display:flex;}
+  @media(min-width:900px){ .nwrap{max-width:760px} }
+  nav button{flex:1;background:none;border:none;color:var(--mut);font-size:11px;font-weight:600;
+    padding:9px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+  nav button .ic{font-size:21px;line-height:1}
+  nav button.on{color:var(--acc)}
+
+  /* ---------- shared ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    padding:16px;margin:14px 0;}
+  .card.flat{margin:10px 0}
+  .card.wood{border-left:4px solid var(--wood)}
+  h1{font-size:24px;margin:18px 0 4px;font-weight:800}
+  h2{font-size:17px;margin:0 0 10px;font-weight:700}
+  h3{font-size:15px;margin:0 0 6px;font-weight:700}
+  .sub{color:var(--mut);font-size:13.5px;margin:0 0 6px}
+  .row{display:flex;align-items:center;gap:10px}
+  .grow{flex:1}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:380px){.grid2{grid-template-columns:1fr}}
+  .acc{color:var(--acc)} .mut{color:var(--mut)} .gold{color:var(--gold)}
+  .blue{color:var(--blue)} .org{color:var(--orange)} .red{color:var(--red)} .wd{color:var(--wood2)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(135deg,var(--acc2),var(--acc));color:#122112;font-weight:800;
+    border:none;border-radius:14px;padding:13px 20px;font-size:15.5px;cursor:pointer;
+    width:100%;transition:transform .08s;}
+  .btn:active{transform:scale(.97)}
+  .btn.sec{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
+  .btn.wood{background:linear-gradient(135deg,#8a6240,var(--wood));color:#1c130b}
+  .btn.ghost{background:none;border:1px dashed var(--line);color:var(--mut)}
+  .btn.sm{width:auto;padding:8px 14px;font-size:13.5px;border-radius:10px}
+  .btn.danger{background:none;border:1px solid #5b3530;color:var(--red)}
+  input,select,textarea{width:100%;background:var(--bg2);border:1px solid var(--line);
+    border-radius:var(--rs);color:var(--txt);padding:12px 13px;font-size:16px;outline:none;
+    font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+  label{display:block;font-size:13px;font-weight:700;color:var(--mut);margin:12px 0 5px}
+  .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);
+    border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--mut)}
+  .pill.g{color:var(--acc);border-color:var(--accD)}
+  .pill.b{color:var(--blue)} .pill.o{color:var(--orange)} .pill.r{color:var(--red)}
+  .pill.w{color:var(--wood2);border-color:#5c452f}
+  .seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .seg button{flex:1;background:none;border:none;color:var(--mut);font-weight:700;font-size:13.5px;
+    padding:9px 4px;border-radius:9px;cursor:pointer}
+  .seg button.on{background:var(--acc);color:#122112}
+  .list .item{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+  .list .item:last-child{border-bottom:none}
+  .emo{width:42px;height:42px;border-radius:12px;background:var(--card2);display:flex;
+    align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+  .hidden{display:none!important}
+  .center{text-align:center}
+  .progressbar{height:9px;background:var(--bg2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .progressbar>div{height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc));transition:width .4s}
+  .divider{height:1px;background:var(--line);margin:12px 0}
+  .chartbox{overflow-x:auto}
+  svg text{font-family:inherit}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:var(--acc);
+    color:#122112;font-weight:800;padding:11px 20px;border-radius:99px;z-index:99;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;transition:opacity .25s;pointer-events:none;
+    font-size:14.5px;white-space:nowrap}
+  .toast.show{opacity:1}
+  .modalBg{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:80;display:flex;
+    align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+  @media(min-width:700px){.modalBg{align-items:center}}
+  .modal{background:var(--bg2);border:1px solid var(--line);border-radius:22px 22px 0 0;
+    width:100%;max-width:680px;max-height:88vh;overflow-y:auto;padding:20px 18px 30px}
+  @media(min-width:700px){.modal{border-radius:22px;max-width:520px}}
+  .modal h2{font-size:19px}
+  .setrow{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .setrow .n{width:34px;height:34px;border-radius:50%;background:var(--card2);display:flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+  .setrow input{text-align:center;font-weight:800;font-size:18px;padding:9px}
+  .checkbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--mut);font-size:19px;cursor:pointer;flex-shrink:0}
+  .checkbtn.on{background:var(--acc);color:#122112;border-color:var(--acc)}
+  .habit{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .quote{font-size:16.5px;font-weight:600;font-style:italic;line-height:1.5}
+  .bigEmoji{font-size:46px;text-align:center;margin:8px 0}
+  .feelrow{display:flex;justify-content:space-between;gap:6px;margin:14px 0}
+  .feelrow button{flex:1;font-size:27px;background:var(--bg2);border:1px solid var(--line);
+    border-radius:14px;padding:10px 0;cursor:pointer;filter:grayscale(1);transition:all .15s}
+  .feelrow button.on{filter:none;border-color:var(--acc);background:var(--card2);transform:scale(1.08)}
+  .lb{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .lb:last-child{border:none}
+  .lb .rank{width:30px;font-weight:800;font-size:17px;text-align:center}
+  .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--wood),var(--acc2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#122112;flex-shrink:0}
+  .stepdots{display:flex;gap:7px;justify-content:center;margin:14px 0}
+  .stepdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+  .stepdots i.on{background:var(--acc);width:22px;border-radius:99px}
+  .onb{min-height:calc(100vh - 60px);display:flex;flex-direction:column;justify-content:center;padding:20px 0}
+  .goalcard{border:2px solid var(--line);border-radius:var(--r);padding:15px;cursor:pointer;margin:9px 0;
+    display:flex;gap:13px;align-items:center;background:var(--card)}
+  .goalcard.on{border-color:var(--acc);background:var(--card2)}
+  .goalcard .t{font-weight:800;font-size:15.5px}
+  .goalcard .d{font-size:13px;color:var(--mut)}
+  .resttimer{font-variant-numeric:tabular-nums;font-weight:800;font-size:15px}
+  textarea{min-height:70px;resize:vertical}
+  .codebox{background:var(--bg2);border:1px dashed var(--accD);border-radius:var(--rs);
+    padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;
+    color:var(--acc);max-height:110px;overflow-y:auto}
+  .statmini{background:var(--card2);border-radius:var(--rs);padding:12px;text-align:center}
+  .statmini .v{font-size:21px;font-weight:800}
+  .statmini .l{font-size:11.5px;color:var(--mut);font-weight:700;margin-top:2px}
+  .exdone{opacity:.55}
+  .achgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .ach{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+  .ach.lock{opacity:.35;filter:grayscale(1)}
+  .ach .e{font-size:26px}
+  .ach .n{font-size:11.5px;font-weight:700;margin-top:4px;line-height:1.25}
+  .glassrow{display:flex;gap:6px;margin:10px 0 4px}
+  .glassrow button{flex:1;font-size:22px;background:var(--bg2);border:1px solid var(--line);
+    border-radius:10px;padding:7px 0;cursor:pointer;opacity:.3;transition:all .12s}
+  .glassrow button.full{opacity:1;border-color:var(--blue);background:var(--card2)}
+  .warmup{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rs);padding:4px 12px;margin:8px 0}
+  .warmup label{display:flex;align-items:center;gap:10px;margin:0;padding:8px 0;font-size:14px;
+    color:var(--txt);font-weight:500;cursor:pointer;border-bottom:1px solid var(--line)}
+  .warmup label:last-child{border:none}
+  .warmup input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc2);flex-shrink:0}
+  details summary{cursor:pointer;font-weight:700;font-size:15px;padding:4px 0;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  .minule{background:rgba(176,131,88,.12);border:1px solid #4a3826;border-radius:9px;
+    padding:6px 10px;font-size:13px;color:var(--wood2);margin:6px 0 2px}
+  .emopick{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:4px 0 2px}
+  .emopick button{font-size:20px;padding:6px 0;background:var(--bg2);border:1px solid var(--line);
+    border-radius:8px;cursor:pointer}
+  .emopick button.on{border-color:var(--acc);background:var(--card2)}
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+  .confetti i{position:absolute;width:9px;height:14px;top:-20px;animation:fall 2.6s linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+</head>
+<body>
+
+<header id="hdr" class="hidden">
+  <div class="hwrap">
+    <div class="logo" onclick="go('home')">
+      <svg width="24" height="24" viewBox="0 0 24 24"><rect x="3" y="5" width="2" height="15" rx="1" fill="#b08358"/><rect x="19" y="5" width="2" height="15" rx="1" fill="#b08358"/><rect x="2" y="4" width="20" height="2.4" rx="1.2" fill="#9aa3a8"/><circle cx="12" cy="10" r="2.2" fill="#ece4d4"/><path d="M9 6.5 L10.7 9 M15 6.5 L13.3 9 M12 12.2 V16 M12 16 L9.8 19.5 M12 16 L14.2 19.5" stroke="#ece4d4" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+      Kali<span>Squad</span>
+    </div>
+    <div class="hstat">
+      <span class="flame">🔥 <span id="hStreak">0</span></span>
+      <span class="xpchip">⚡ <span id="hXp">0</span></span>
+      <button class="gear" onclick="openSettings()" title="Nastavení">⚙️</button>
+    </div>
+  </div>
+  <div class="lvlbarWrap"><div class="lvlbar" id="hLvlBar"></div></div>
+</header>
+
+<div id="app"></div>
+
+<nav id="nav" class="hidden">
+  <div class="nwrap">
+    <button data-v="home"><span class="ic">🌲</span>Dnes</button>
+    <button data-v="train"><span class="ic">🏋️</span>Trénink</button>
+    <button data-v="food"><span class="ic">🍗</span>Jídlo</button>
+    <button data-v="progress"><span class="ic">📈</span>Progres</button>
+    <button data-v="squad"><span class="ic">👥</span>Parta</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================
+   KaliSquad v2 - kalistenika, jídlo, progres, parta
+   Data jsou lokálně v zařízení (localStorage).
+   ===================================================== */
+
+const DB = 'kalisquad_v1';
+
+/* ---------- preset cviky (unit: 'r' = opakování, 's' = sekundy) ---------- */
+const EXERCISES = [
+ {id:'pushup',   name:'Kliky',                emo:'🤜', cat:'push', lvl:1, unit:'r', easier:'kneepush', harder:'declpush', tip:'Tělo zpevněné v prkně, lokty cca 45° od těla, hrudník až k zemi.'},
+ {id:'kneepush', name:'Kliky na kolenou',     emo:'🦵', cat:'push', lvl:0, unit:'r', harder:'pushup', tip:'Lehčí varianta kliků. Boky drž v ose s tělem, nezvedej zadek.'},
+ {id:'declpush', name:'Kliky s nohama nahoře',emo:'⛰️', cat:'push', lvl:2, unit:'r', easier:'pushup', harder:'archpush', tip:'Nohy na lavičce. Větší zátěž na ramena a horní prsa.'},
+ {id:'archpush', name:'Archer kliky',         emo:'🏹', cat:'push', lvl:3, unit:'r', easier:'declpush', tip:'Široký úchop, klesej k jedné ruce. Příprava na klik na jedné ruce.'},
+ {id:'pikepush', name:'Pike kliky',           emo:'🔺', cat:'push', lvl:2, unit:'r', easier:'pushup', harder:'hspu', tip:'Zadek nahoru do stříšky, hlava míří k zemi mezi ruce. Buduje ramena na stojku.'},
+ {id:'hspu',     name:'Stojka u zdi (výdrž)', emo:'🤸', cat:'push', lvl:3, unit:'s', easier:'pikepush', tip:'Stojka břichem ke zdi, zpevněné tělo. Měř sekundy výdrže.'},
+ {id:'dips',     name:'Dipy',                 emo:'🆙', cat:'push', lvl:2, unit:'r', easier:'benchdip', harder:'muscleup', tip:'Na bradlech. Lokty dozadu, dolů aspoň do 90°.'},
+ {id:'benchdip', name:'Dipy o lavičku',       emo:'🪑', cat:'push', lvl:0, unit:'r', harder:'dips', tip:'Ruce za tělem na lavičce. Lehčí varianta dipů, lokty táhni dozadu.'},
+ {id:'pullup',   name:'Shyby',                emo:'🧗', cat:'pull', lvl:2, unit:'r', easier:'negpull', harder:'muscleup', tip:'Nadhmat, z plného visu bradou nad tyč. Žádné kopání nohama.'},
+ {id:'chinup',   name:'Shyby podhmatem',      emo:'💪', cat:'pull', lvl:2, unit:'r', easier:'negpull', tip:'Podhmat víc zapojí biceps. Plný rozsah, kontrolovaně dolů.'},
+ {id:'negpull',  name:'Negativní shyby',      emo:'🐌', cat:'pull', lvl:1, unit:'r', easier:'auspull', harder:'pullup', tip:'Vyskoč nahoru a co nejpomaleji (5+ s) klesej. Cesta k prvnímu shybu.'},
+ {id:'auspull',  name:'Australské shyby',     emo:'🇦🇺', cat:'pull', lvl:0, unit:'r', harder:'negpull', tip:'Tyč v úrovni pasu, tělo šikmo pod ní, přitahuj hrudník k tyči.'},
+ {id:'muscleup', name:'Muscle-up progrese',   emo:'🚀', cat:'pull', lvl:3, unit:'r', easier:'pullup', tip:'Výbušný shyb až k hrudníku + přechod přes tyč.'},
+ {id:'hang',     name:'Vis na hrazdě (výdrž)',emo:'🐒', cat:'pull', lvl:0, unit:'s', harder:'auspull', tip:'Aktivní vis, ramena od uší. Buduje úchop a zdravá ramena.'},
+ {id:'squat',    name:'Dřepy',                emo:'🦿', cat:'legs', lvl:0, unit:'r', harder:'jsquat', tip:'Paty na zemi, kolena ve směru špiček, dolů pod rovnoběžku.'},
+ {id:'jsquat',   name:'Dřepy s výskokem',     emo:'🦘', cat:'legs', lvl:1, unit:'r', easier:'squat', harder:'pistol', tip:'Z dřepu výbušně vyskoč, doskok do měkkých kolen.'},
+ {id:'lunge',    name:'Výpady',               emo:'🚶', cat:'legs', lvl:1, unit:'r', harder:'pistol', tip:'Dlouhý krok vpřed, zadní koleno těsně nad zem, trup vzpřímený.'},
+ {id:'pistol',   name:'Pistol squat progrese',emo:'🔫', cat:'legs', lvl:3, unit:'r', easier:'jsquat', tip:'Dřep na jedné noze. Začni na lavičku nebo s přidržením.'},
+ {id:'plank',    name:'Plank',                emo:'🧱', cat:'core', lvl:0, unit:'s', harder:'hollow', tip:'Lokty pod rameny, zpevněný zadek i břicho, žádný prohnutý hřbet.'},
+ {id:'hollow',   name:'Hollow body hold',     emo:'🌙', cat:'core', lvl:1, unit:'s', easier:'plank', harder:'lsit', tip:'Leh na zádech, bedra do země, nohy a lopatky nad zemí.'},
+ {id:'legraise', name:'Zvedání nohou ve visu',emo:'🦶', cat:'core', lvl:2, unit:'r', easier:'hollow', harder:'lsit', tip:'Ve visu zvedej natažené nohy k tyči. Lehčí: kolena k hrudi.'},
+ {id:'lsit',     name:'L-sit (výdrž)',        emo:'📐', cat:'core', lvl:3, unit:'s', easier:'legraise', tip:'Vzpor na bradlech/zemi, nohy natažené před tebou.'},
+ {id:'burpee',   name:'Burpees',              emo:'🔥', cat:'full', lvl:1, unit:'r', tip:'Klik + výskok. Kondiční zabiják, drž tempo a techniku.'},
+];
+const CATS = {push:'Tlaky', pull:'Tahy', legs:'Nohy', core:'Core', full:'Celé tělo', own:'Vlastní'};
+const LVLN = ['Začátečník','Mírně pokročilý','Pokročilý','Expert'];
+const EX_EMOJIS = ['⭐','🤜','🧗','🆙','🦿','🧱','🐒','🏹','🚀','🤸','🔥','💪','🦵','🦶','📐','🌙','🪑','🏃','🥊','🎯','🐢','⚡','🪨','🦍'];
+const MEAL_EMOJIS = ['🍽️','🥣','🍛','🍳','🍌','🥤','🍓','🍗','🥛','🐟','🥚','🥪','🫘','🍚','🥩','🥗','🍝','🌯','🥞','🧀','🍞','🥜','🍎','🍫'];
+
+/* ---------- rozcvička ---------- */
+const WARMUP = [
+ '30 s poskoky / jumping jacks (zahřátí)',
+ '10× kroužení rameny dopředu i dozadu',
+ '10× kroužení zápěstími a lokty',
+ '10 dřepů bez zátěže',
+ '10-15 s vis na hrazdě (protažení ramen)',
+];
+
+/* ---------- preset jídla ---------- */
+const MEALS = [
+ {id:'m1', name:'Ovesná kaše s banánem a arašídovým máslem', emo:'🥣', when:'pre',  p:18, kcal:520, note:'60-90 min před tréninkem. Pomalé sacharidy = stabilní energie.'},
+ {id:'m2', name:'Rýže s kuřecím masem a zeleninou',           emo:'🍛', when:'pre',  p:42, kcal:600, note:'2 h před tréninkem. Klasika, která nikdy nezklame.'},
+ {id:'m3', name:'Toast s vejci a šunkou',                     emo:'🍳', when:'pre',  p:28, kcal:430, note:'Rychlá snídaně před ranním tréninkem.'},
+ {id:'m4', name:'Banán + hrst ořechů',                        emo:'🍌', when:'pre',  p:6,  kcal:280, note:'Když je do tréninku míň než hodina. Lehké, rychlá energie.'},
+ {id:'m5', name:'Proteinový shake s mlékem',                  emo:'🥤', when:'post', p:32, kcal:280, note:'Do 30-60 min po tréninku. Nejrychlejší doplnění bílkovin.'},
+ {id:'m6', name:'Tvaroh s ovocem a medem',                    emo:'🍓', when:'post', p:25, kcal:300, note:'Kaseinový protein, ideální i večer před spaním.'},
+ {id:'m7', name:'Kuřecí prsa s bramborami',                   emo:'🍗', when:'post', p:45, kcal:550, note:'Plnohodnotné jídlo 1-2 h po tréninku.'},
+ {id:'m8', name:'Řecký jogurt s granolou',                    emo:'🥛', when:'post', p:20, kcal:320, note:'Rychlá svačina po tréninku nebo k snídani.'},
+ {id:'m9', name:'Losos s rýží a brokolicí',                   emo:'🐟', when:'any',  p:38, kcal:620, note:'Omega-3 pro regeneraci kloubů. 1-2x týdně super.'},
+ {id:'m10',name:'Vejce natvrdo (3 ks)',                       emo:'🥚', when:'any',  p:19, kcal:230, note:'Svačina kdykoliv. Levný kvalitní protein.'},
+ {id:'m11',name:'Tuňák s pečivem a zeleninou',                emo:'🥪', when:'any',  p:30, kcal:380, note:'Rychlovka, když není čas vařit.'},
+ {id:'m12',name:'Čočka/fazole s rýží',                        emo:'🫘', when:'any',  p:22, kcal:480, note:'Rostlinný protein + vláknina, v kombu s rýží kompletní.'},
+];
+const WHEN = {pre:'Před tréninkem', post:'Po tréninku', any:'Kdykoliv'};
+
+/* ---------- mindset ---------- */
+const QUOTES = [
+ 'Disciplína je dělat to, co je třeba, i když se ti nechce.',
+ 'Nepotřebuješ motivaci. Potřebuješ návyk.',
+ 'Tělo dokáže skoro všechno. Je to hlava, kterou musíš přesvědčit.',
+ 'Každý trénink, který nevynecháš, je vyhraný souboj sám se sebou.',
+ 'Nesrovnávej se s ostatními. Srovnávej se s tím, kdo jsi byl včera.',
+ 'Sval roste v odpočinku. Spánek je trénink.',
+ 'První shyb je nejtěžší. Pak už jen počítáš.',
+ 'Konzistence poráží intenzitu. Vždycky.',
+ 'Hrazda nelže. Buď to dáš, nebo na tom makáš dál.',
+ 'Nikdo nelituje tréninku, který dokončil.',
+ 'Malé kroky každý den porazí velký skok jednou za měsíc.',
+ 'Tvoje jediná konkurence je tvoje včerejší já.',
+];
+const HABITS = [
+ {id:'sleep',   emo:'😴', name:'Spal jsem 7+ hodin'},
+ {id:'protein', emo:'🍗', name:'Splnil jsem protein'},
+ {id:'move',    emo:'🚶', name:'Pohyb / trénink / protažení'},
+];
+
+/* ---------- levely ---------- */
+const LEVELS = [
+ {xp:0,    name:'Nováček',        emo:'🐣'},
+ {xp:200,  name:'Učedník',        emo:'🌱'},
+ {xp:500,  name:'Bojovník',       emo:'🥊'},
+ {xp:1000, name:'Atlet',          emo:'🏃'},
+ {xp:2000, name:'Šelma',          emo:'🐺'},
+ {xp:3500, name:'Stroj',          emo:'🤖'},
+ {xp:5500, name:'Legenda',        emo:'🦍'},
+ {xp:8000, name:'Král hrazdy',    emo:'👑'},
+];
+
+/* ---------- odznaky ---------- */
+const ACH = [
+ {id:'w1',    emo:'🎯', name:'První trénink',   desc:'Dokončil jsi svůj první trénink.', cond:s=>s.workouts.length>=1},
+ {id:'w5',    emo:'🔨', name:'Rozjetý',          desc:'5 tréninků hotovo.',               cond:s=>s.workouts.length>=5},
+ {id:'w20',   emo:'🏗️', name:'Stavitel těla',    desc:'20 tréninků hotovo.',              cond:s=>s.workouts.length>=20},
+ {id:'w50',   emo:'🗿', name:'Nezastavitelný',   desc:'50 tréninků hotovo.',              cond:s=>s.workouts.length>=50},
+ {id:'s3',    emo:'🔥', name:'3 dny v tahu',     desc:'Streak 3 dny v řadě.',             cond:s=>s.streak.count>=3},
+ {id:'s7',    emo:'🌋', name:'Týden v ohni',     desc:'Streak 7 dní v řadě.',             cond:s=>s.streak.count>=7},
+ {id:'s30',   emo:'☄️', name:'Měsíc disciplíny', desc:'Streak 30 dní v řadě.',            cond:s=>s.streak.count>=30},
+ {id:'x1000', emo:'⚡', name:'1000 XP',          desc:'Nasbíral jsi 1000 XP.',            cond:s=>s.xp>=1000},
+ {id:'x5000', emo:'💎', name:'5000 XP',          desc:'Nasbíral jsi 5000 XP.',            cond:s=>s.xp>=5000},
+ {id:'t1',    emo:'🏁', name:'Startovní čára',   desc:'První max test hotový.',           cond:s=>s.maxTests.length>=1},
+ {id:'pr',    emo:'📈', name:'Rekordman',        desc:'Překonal jsi svůj rekord v max testu.', cond:s=>!!(s.flags&&s.flags.pr)},
+ {id:'pull10',emo:'🦍', name:'10 shybů',         desc:'Max test: 10+ shybů v sérii.',     cond:s=>s.maxTests.some(t=>t.pull>=10)},
+ {id:'push30',emo:'🦾', name:'30 kliků',         desc:'Max test: 30+ kliků v sérii.',     cond:s=>s.maxTests.some(t=>t.push>=30)},
+ {id:'ex1',   emo:'⭐', name:'Vynálezce',        desc:'Přidal jsi vlastní cvik.',         cond:s=>s.customEx.length>=1},
+ {id:'f1',    emo:'🤝', name:'Parťák',           desc:'První kámoš v partě.',             cond:s=>s.friends.length>=1},
+ {id:'p5',    emo:'🍗', name:'Protein machine',  desc:'Protein splněn 5 různých dní.',    cond:s=>proteinDays(s)>=5},
+];
+
+/* =====================================================
+   STATE
+   ===================================================== */
+let S = load();
+function load(){
+  let d = null;
+  try{ d = JSON.parse(localStorage.getItem(DB)); }catch(e){}
+  d = d || {};
+  return {
+    profile: d.profile||null, xp: d.xp||0,
+    streak: d.streak||{count:0,last:null},
+    customEx: d.customEx||[], customMeals: d.customMeals||[],
+    workouts: d.workouts||[], weights: d.weights||[],
+    maxTests: d.maxTests||[], foodLog: d.foodLog||{},
+    habits: d.habits||{}, friends: d.friends||[],
+    active: d.active||null,
+    water: d.water||{}, xpLog: d.xpLog||{}, ach: d.ach||[], flags: d.flags||{},
+  };
+}
+function save(){
+  try{ localStorage.setItem(DB, JSON.stringify(S)); }
+  catch(e){ /* localStorage blokované (sandbox/soukromé okno) - app pojede dál, jen neuloží po zavření */ }
+}
+window.addEventListener('error', ev=>{ try{ toast('Chyba: '+(ev.message||'neznámá')); }catch(_){} });
+
+const today = ()=> new Date().toISOString().slice(0,10);
+const fmtD = d => { const x=new Date(d); return x.getDate()+'. '+(x.getMonth()+1)+'.'; };
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function monday(){ const d=new Date(); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d.toISOString().slice(0,10); }
+function weekStats(){
+  const m=monday();
+  const wk=S.workouts.filter(w=>w.date>=m).length;
+  let xp=0; Object.keys(S.xpLog).forEach(k=>{ if(k>=m) xp+=S.xpLog[k]; });
+  return {wk,xp};
+}
+function proteinDays(s){
+  if(!s.profile) return 0;
+  const target = Math.round(latestWeight()*(s.profile.goal==='fit'?1.6:2.0));
+  let n=0;
+  Object.keys(s.foodLog).forEach(d=>{
+    const sum=s.foodLog[d].reduce((a,f)=>a+f.p,0);
+    if(sum>=target) n++;
+  });
+  return n;
+}
+
+/* ---------- XP + streak + odznaky ---------- */
+function levelInfo(){
+  let li=0; LEVELS.forEach((l,i)=>{ if(S.xp>=l.xp) li=i; });
+  const cur=LEVELS[li], next=LEVELS[li+1];
+  const pct = next ? Math.min(100,Math.round((S.xp-cur.xp)/(next.xp-cur.xp)*100)) : 100;
+  return {i:li, cur, next, pct};
+}
+function addXp(n, msg){
+  S.xp += n;
+  const t=today(); S.xpLog[t]=(S.xpLog[t]||0)+n;
+  touchStreak(); save(); renderHeader();
+  toast((msg||'+'+n+' XP')+' ⚡');
+}
+function touchStreak(){
+  const t = today();
+  if(S.streak.last===t) return;
+  if(S.streak.last && daysBetween(S.streak.last,t)===1) S.streak.count++;
+  else S.streak.count = 1;
+  S.streak.last = t;
+}
+let pendingEmo=null;
+function emoPicker(list,sel){
+  return `<div class="emopick">${list.map(e=>`<button type="button" class="${e===sel?'on':''}" onclick="pickEmo(this,'${e}')">${e}</button>`).join('')}</div>`;
+}
+function pickEmo(btn,e){
+  pendingEmo=e;
+  btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+let achQueue=[];
+function checkAch(){
+  ACH.forEach(a=>{
+    if(S.ach.includes(a.id)) return;
+    let ok=false; try{ ok=a.cond(S); }catch(e){}
+    if(ok){ S.ach.push(a.id); achQueue.push(a); }
+  });
+  if(achQueue.length){ save(); showNextAch(); }
+}
+function showNextAch(){
+  const a=achQueue.shift(); if(!a) return;
+  confetti();
+  modal(`<div class="bigEmoji">${a.emo}</div>
+    <h2 class="center">Odznak odemčen!</h2>
+    <p class="center" style="font-weight:800;font-size:18px;margin:2px 0">${a.name}</p>
+    <p class="sub center">${a.desc}</p>
+    <button class="btn" onclick="closeModal();showNextAch()">Pokračovat 🎉</button>`, true);
+}
+
+/* ---------- toast + confetti ---------- */
+let toastT;
+function toast(m){
+  const el=document.getElementById('toast'); el.textContent=m; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2200);
+}
+function confetti(){
+  const c=document.createElement('div'); c.className='confetti';
+  const cols=['#8fc878','#d2a878','#d9a441','#86aec2','#cf7a6b','#5f9e54'];
+  for(let i=0;i<60;i++){
+    const p=document.createElement('i');
+    p.style.left=Math.random()*100+'%';
+    p.style.background=cols[i%cols.length];
+    p.style.animationDelay=(Math.random()*0.8)+'s';
+    p.style.transform='rotate('+Math.random()*360+'deg)';
+    c.appendChild(p);
+  }
+  document.body.appendChild(c); setTimeout(()=>c.remove(),3600);
+}
+
+/* ---------- hrazda grafika ---------- */
+function svgHero(h){
+  return `<svg viewBox="0 0 340 150" width="100%" height="${h||140}" preserveAspectRatio="xMidYMid meet">
+    <circle cx="299" cy="27" r="11" fill="#d9a441" opacity=".75"/>
+    <path d="M52 32 q5 -7 10 0 M66 26 q5 -7 10 0" stroke="#9cab94" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="34" cy="116" rx="50" ry="9" fill="#15200f"/>
+    <rect x="30" y="76" width="8" height="42" rx="2" fill="#6b4a30"/>
+    <circle cx="34" cy="60" r="23" fill="#2c4a2a"/>
+    <circle cx="19" cy="72" r="15" fill="#27411f"/>
+    <circle cx="50" cy="70" r="15" fill="#27411f"/>
+    <circle cx="36" cy="52" r="12" fill="#385930"/>
+    <rect x="0" y="114" width="340" height="36" fill="#221a10"/>
+    <rect x="0" y="112" width="340" height="6" rx="3" fill="#2f4a28"/>
+    <rect x="120" y="40" width="7" height="76" rx="2" fill="#8a6240"/>
+    <rect x="218" y="40" width="7" height="76" rx="2" fill="#8a6240"/>
+    <rect x="112" y="37" width="121" height="5" rx="2.5" fill="#aab4ba"/>
+    <g stroke="#ece4d4" stroke-width="3.4" stroke-linecap="round" fill="none">
+      <path d="M160 42 L166 60 M186 42 L179 60"/>
+      <path d="M172.5 66 L172.5 90"/>
+      <path d="M172.5 90 L162 104 L164 113 M172.5 90 L183 104 L181 113"/>
+    </g>
+    <circle cx="172.5" cy="56" r="6.4" fill="#ece4d4"/>
+    <rect x="262" y="88" width="6" height="28" rx="2" fill="#8a6240"/>
+    <rect x="300" y="88" width="6" height="28" rx="2" fill="#8a6240"/>
+    <rect x="257" y="85" width="54" height="4" rx="2" fill="#aab4ba"/>
+    <circle cx="322" cy="108" r="12" fill="#27411f"/>
+    <circle cx="333" cy="113" r="8" fill="#2c4a2a"/>
+  </svg>`;
+}
+
+/* =====================================================
+   PLÁN
+   ===================================================== */
+function planFor(profile){
+  const lv = profile.level;
+  const goal = profile.goal;
+  const reps = goal==='lose' ? 'co nejvíc opakování, pauza jen 45-60 s'
+             : goal==='gain' ? 'těžší varianty, 6-12 opakování, pauza 90-120 s'
+             : '8-15 opakování, pauza 60-90 s';
+  const pick = ids => ids.map(id=>EXERCISES.find(e=>e.id===id));
+  let A,B,C;
+  if(lv===0){
+    A = pick(['kneepush','benchdip','squat','plank']);
+    B = pick(['auspull','hang','lunge','hollow']);
+    C = pick(['kneepush','auspull','squat','plank','burpee']);
+  }else if(lv===1){
+    A = pick(['pushup','benchdip','pikepush','plank']);
+    B = pick(['negpull','auspull','jsquat','hollow']);
+    C = pick(['pushup','negpull','lunge','burpee','hollow']);
+  }else{
+    A = pick(['pushup','dips','pikepush','lsit']);
+    B = pick(['pullup','chinup','jsquat','legraise']);
+    C = pick(['declpush','pullup','pistol','burpee','hollow']);
+  }
+  return {A,B,C, reps,
+    days:'Pondělí (A) / Středa (B) / Pátek (C)',
+    note: goal==='lose'
+      ? 'Cíl: zhubnout. Jedeš kruhově, krátké pauzy, klidně přidej 20-30 min chůze/běhu v netréninkové dny. Kalorie lehce pod výdejem, protein vysoko.'
+      : goal==='gain'
+      ? 'Cíl: nabrat. Jdi blízko selhání, postupně ztěžuj varianty cviků. Jez v lehkém nadbytku (+300 kcal), protein vysoko, spi 8 h.'
+      : 'Cíl: být fit. Drž konzistenci 3x týdně, postupně přidávej opakování. Strava vyvážená, protein hlídej.'
+  };
+}
+function nextWorkoutKey(){ return ['A','B','C'][S.workouts.length%3]; }
+function isTrainingDay(){ const d=new Date().getDay(); return d===1||d===3||d===5; }
+
+/* ---------- výživa ---------- */
+function nutrition(){
+  const p=S.profile;
+  const w = latestWeight();
+  const protMul = p.goal==='fit'?1.6:2.0;
+  const protein = Math.round(w*protMul);
+  const bmr = 10*w + 6.25*p.height - 5*p.age + 5;
+  let kcal = Math.round(bmr*1.55/10)*10;
+  if(p.goal==='gain') kcal+=300;
+  if(p.goal==='lose') kcal-=400;
+  return {protein,kcal,w};
+}
+function latestWeight(){
+  if(S.weights.length) return S.weights[S.weights.length-1].kg;
+  return S.profile ? S.profile.weight : 70;
+}
+function lastSets(name){
+  for(let i=S.workouts.length-1;i>=0;i--){
+    const e=(S.workouts[i].ex||[]).find(x=>x.name===name);
+    if(e) return {date:S.workouts[i].date, sets:e.sets, unit:e.unit||'r'};
+  }
+  return null;
+}
+
+/* =====================================================
+   RENDER CORE
+   ===================================================== */
+const app = document.getElementById('app');
+let view = 'home';
+function go(v){
+  view=v; render();
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  window.scrollTo({top:0});
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+
+function renderHeader(){
+  document.getElementById('hStreak').textContent = S.streak.count;
+  document.getElementById('hXp').textContent = S.xp;
+  document.getElementById('hLvlBar').style.width = levelInfo().pct+'%';
+}
+
+function render(){
+  if(!S.profile){ renderOnboarding(); return; }
+  document.getElementById('hdr').classList.remove('hidden');
+  document.getElementById('nav').classList.remove('hidden');
+  renderHeader();
+  if(S.active && view!=='workout') view='workout';
+  if(view==='home') renderHome();
+  else if(view==='train') renderTrain();
+  else if(view==='workout') renderWorkout();
+  else if(view==='food') renderFood();
+  else if(view==='progress') renderProgress();
+  else if(view==='squad') renderSquad();
+}
+
+/* =====================================================
+   ONBOARDING
+   ===================================================== */
+let ob = {step:0, data:{goal:null, level:null}};
+function renderOnboarding(){
+  document.getElementById('hdr').classList.add('hidden');
+  document.getElementById('nav').classList.add('hidden');
+  const d = ob.data;
+  let inner='';
+  if(ob.step===0){
+    inner = `
+      ${svgHero(150)}
+      <h1 class="center" style="margin-top:6px">Kali<span class="acc">Squad</span></h1>
+      <p class="sub center">Hrazdy, jídlo a progres. Ty a tvoje parta.<br>Odpověz na pár otázek a dostaneš plán na míru.</p>
+      <button class="btn" onclick="obNext()">Jdeme na to 🚀</button>`;
+  }
+  if(ob.step===1){
+    inner = `
+      <h2>Kdo jsi?</h2>
+      <label>Jméno / přezdívka</label>
+      <input id="obName" placeholder="např. Adam" value="${d.name||''}">
+      <div class="grid2">
+        <div><label>Věk</label><input id="obAge" type="number" inputmode="numeric" placeholder="18" value="${d.age||''}"></div>
+        <div><label>Výška (cm)</label><input id="obH" type="number" inputmode="numeric" placeholder="180" value="${d.height||''}"></div>
+        <div><label>Váha (kg)</label><input id="obW" type="number" inputmode="decimal" placeholder="72" value="${d.weight||''}"></div>
+        <div><label>Cílová váha (kg)</label><input id="obTW" type="number" inputmode="decimal" placeholder="78" value="${d.targetWeight||''}"></div>
+      </div>
+      <div style="height:16px"></div>
+      <button class="btn" onclick="obSaveBasics()">Pokračovat</button>`;
+  }
+  if(ob.step===2){
+    inner = `
+      <h2>Jaký je tvůj cíl?</h2>
+      ${[['gain','🍖','Nabrat svaly','Síla a objem, jíst víc, těžší cviky'],
+         ['lose','🔥','Zhubnout','Kruhové tréninky, kalorie dolů, protein nahoru'],
+         ['fit','⚖️','Být fit a silný','Udržovat se, zlepšovat techniku a výdrž']]
+        .map(g=>`<div class="goalcard ${d.goal===g[0]?'on':''}" onclick="obSet('goal','${g[0]}')">
+          <div class="emo">${g[1]}</div><div><div class="t">${g[2]}</div><div class="d">${g[3]}</div></div></div>`).join('')}
+      <div style="height:10px"></div>
+      <button class="btn" onclick="${d.goal?'obNext()':'toast(\'Vyber cíl 👆\')'}">Pokračovat</button>`;
+  }
+  if(ob.step===3){
+    inner = `
+      <h2>Jak jsi na tom teď?</h2>
+      ${[[0,'🐣','Začátečník','Klik zvládnu, shyb zatím ne (0-1)'],
+         [1,'🌱','Mírně pokročilý','Dám 10+ kliků a 1-5 shybů'],
+         [2,'🥊','Pokročilý','5+ shybů, dipy v pohodě, chci progrese']]
+        .map(g=>`<div class="goalcard ${d.level===g[0]?'on':''}" onclick="obSet('level',${g[0]})">
+          <div class="emo">${g[1]}</div><div><div class="t">${g[2]}</div><div class="d">${g[3]}</div></div></div>`).join('')}
+      <div style="height:10px"></div>
+      <button class="btn" onclick="${d.level!==null?'obFinish()':'toast(\'Vyber úroveň 👆\')'}">Vytvořit můj plán ✨</button>`;
+  }
+  app.innerHTML = `<div class="onb"><div class="card" style="padding:22px">
+    ${inner}
+    <div class="stepdots">${[0,1,2,3].map(i=>`<i class="${i<=ob.step?'on':''}"></i>`).join('')}</div>
+  </div></div>`;
+}
+function obNext(){ ob.step++; renderOnboarding(); }
+function obSet(k,v){ ob.data[k]=v; renderOnboarding(); }
+function obSaveBasics(){
+  const n=document.getElementById('obName').value.trim();
+  const a=+document.getElementById('obAge').value, h=+document.getElementById('obH').value;
+  const w=+document.getElementById('obW').value, tw=+document.getElementById('obTW').value;
+  if(!n||!a||!h||!w){ toast('Vyplň všechna pole 🙏'); return; }
+  Object.assign(ob.data,{name:n,age:a,height:h,weight:w,targetWeight:tw||w});
+  obNext();
+}
+function obFinish(){
+  S.profile = {...ob.data, created: today()};
+  S.weights.push({date:today(), kg:ob.data.weight});
+  S.xp = 30; S.xpLog[today()]=30; touchStreak(); save();
+  confetti(); toast('Vítej v KaliSquad! +30 XP ⚡');
+  go('home');
+}
+
+/* =====================================================
+   NASTAVENÍ
+   ===================================================== */
+function openSettings(){
+  const p=S.profile;
+  modal(`<h2>⚙️ Nastavení</h2>
+    <label>Jméno</label><input id="stName" value="${p.name}">
+    <div class="grid2">
+      <div><label>Věk</label><input id="stAge" type="number" value="${p.age}"></div>
+      <div><label>Výška (cm)</label><input id="stH" type="number" value="${p.height}"></div>
+      <div><label>Váha (kg)</label><input id="stW" type="number" value="${latestWeight()}"></div>
+      <div><label>Cílová váha (kg)</label><input id="stTW" type="number" value="${p.targetWeight}"></div>
+    </div>
+    <label>Cíl</label>
+    <select id="stGoal">
+      <option value="gain" ${p.goal==='gain'?'selected':''}>Nabrat svaly</option>
+      <option value="lose" ${p.goal==='lose'?'selected':''}>Zhubnout</option>
+      <option value="fit" ${p.goal==='fit'?'selected':''}>Být fit a silný</option>
+    </select>
+    <label>Úroveň (mění tréninkový plán)</label>
+    <select id="stLvl">
+      <option value="0" ${p.level===0?'selected':''}>Začátečník</option>
+      <option value="1" ${p.level===1?'selected':''}>Mírně pokročilý</option>
+      <option value="2" ${p.level===2?'selected':''}>Pokročilý</option>
+    </select>
+    <div style="height:14px"></div>
+    <button class="btn" onclick="saveSettings()">Uložit změny</button>
+    <div class="divider"></div>
+    <h3>💾 Záloha dat</h3>
+    <p class="sub">Zkopíruj si zálohu (přenos do nového mobilu), nebo vlož zálohu sem a obnov ji.</p>
+    <button class="btn sec" onclick="exportBackup()">Zkopírovat zálohu 📋</button>
+    <div style="height:8px"></div>
+    <textarea id="stImport" placeholder="Sem vlož zálohu (KALIFULL...)"></textarea>
+    <div style="height:8px"></div>
+    <button class="btn wood" onclick="importBackup()">Obnovit ze zálohy</button>
+    <div class="divider"></div>
+    <button class="btn danger" onclick="resetAll()">Smazat všechna data a začít znovu</button>`);
+}
+function saveSettings(){
+  const p=S.profile;
+  const n=document.getElementById('stName').value.trim();
+  const w=+document.getElementById('stW').value;
+  if(!n||!w){ toast('Doplň jméno a váhu'); return; }
+  p.name=n;
+  p.age=+document.getElementById('stAge').value||p.age;
+  p.height=+document.getElementById('stH').value||p.height;
+  p.targetWeight=+document.getElementById('stTW').value||p.targetWeight;
+  p.goal=document.getElementById('stGoal').value;
+  p.level=+document.getElementById('stLvl').value;
+  if(w!==latestWeight()){ S.weights.push({date:today(),kg:w}); }
+  p.weight=w;
+  save(); closeModal(); toast('Uloženo ✅'); render();
+}
+function exportBackup(){
+  const c='KALIFULL.'+btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  if(navigator.clipboard) navigator.clipboard.writeText(c).then(()=>toast('Záloha zkopírována 📋'));
+  else prompt('Zkopíruj zálohu:', c);
+}
+function importBackup(){
+  const raw=document.getElementById('stImport').value.trim();
+  if(!raw.startsWith('KALIFULL.')){ toast('To není záloha KaliSquad 🤔'); return; }
+  try{
+    const d=JSON.parse(decodeURIComponent(escape(atob(raw.slice(9)))));
+    if(!d.profile) throw 0;
+    localStorage.setItem(DB, JSON.stringify(d));
+    S=load(); save(); closeModal(); render(); toast('Záloha obnovena ✅');
+  }catch(e){ toast('Zálohu se nepodařilo načíst 😕'); }
+}
+function resetAll(){
+  if(confirm('Fakt smazat VŠECHNA data? Tohle nejde vrátit.')){
+    localStorage.removeItem(DB); S=load(); closeModal(); ob={step:0,data:{goal:null,level:null}}; render();
+  }
+}
+
+/* =====================================================
+   HOME - Dnes
+   ===================================================== */
+function renderHome(){
+  const li = levelInfo();
+  const p = S.profile;
+  const nut = nutrition();
+  const plan = planFor(p);
+  const eaten = (S.foodLog[today()]||[]).reduce((s,f)=>s+f.p,0);
+  const water = S.water[today()]||0;
+  const hab = S.habits[today()]||{};
+  const q = QUOTES[Math.abs(daysBetween('2026-01-01',today()))%QUOTES.length];
+  const wk = nextWorkoutKey();
+  const ws = weekStats();
+  const lastTest = S.maxTests[S.maxTests.length-1];
+  const testDue = !lastTest || daysBetween(lastTest.date,today())>=14;
+  const doneToday = S.workouts.some(w=>w.date===today());
+
+  app.innerHTML = `
+  <h1>Čau, ${p.name}! ${li.cur.emo}</h1>
+  <p class="sub">${li.cur.name} · level ${li.i+1}${li.next?` · do dalšího levelu ${li.next.xp-S.xp} XP`:' · MAX LEVEL'}</p>
+
+  <div class="grid2">
+    <div class="statmini"><div class="v ${ws.wk>=3?'acc':''}">🏋️ ${ws.wk}/3</div><div class="l">tréninky tento týden</div></div>
+    <div class="statmini"><div class="v acc">⚡ ${ws.xp}</div><div class="l">XP tento týden</div></div>
+  </div>
+
+  <div class="card wood">
+    ${doneToday
+      ? `<h2>✅ Dnešní trénink hotový!</h2><p class="sub">Parádní práce. Doplň protein, pij a regeneruj. 😤</p>`
+      : `<h2>${isTrainingDay()?'🏋️ Dnes je tréninkový den!':'🌲 Dnes je volno (plán: Po / St / Pá)'}</h2>
+         <p class="sub">Další na řadě: <b class="acc">Trénink ${wk}</b> · ${plan[wk].map(e=>e.emo+' '+e.name).join(' · ')}</p>
+         <button class="btn" onclick="startWorkout()">Začít trénink ${wk} ▶</button>`}
+  </div>
+
+  <div class="card flat">
+    <div class="row">
+      <h2 class="grow" style="margin:0">🍗 Protein dnes</h2>
+      <span class="pill ${eaten>=nut.protein?'g':''}">${eaten} / ${nut.protein} g</span>
+    </div>
+    <div style="height:8px"></div>
+    <div class="progressbar"><div style="width:${Math.min(100,eaten/nut.protein*100)}%"></div></div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <span class="grow" style="font-weight:700;font-size:14px">💧 Voda</span>
+      <span class="pill ${water>=8?'b':''}">${water} / 8 sklenic</span>
+    </div>
+    <p class="sub" style="margin-top:6px">Zapisuj v záložce Jídlo. Splněný protein ti sám odškrtne návyk. 😉</p>
+  </div>
+
+  ${testDue?`<div class="card flat" style="border-color:var(--gold)">
+    <h3>🏆 Čas na max test!</h3>
+    <p class="sub">Každé 2 týdny: max kliky, shyby a dipy. Ať vidíš, jak rosteš.</p>
+    <button class="btn sec" onclick="openMaxTest()">Dát max test</button>
+  </div>`:''}
+
+  <div class="card flat">
+    <h3>🧠 Mindset dne</h3>
+    <p class="quote">„${q}“</p>
+    <div class="divider"></div>
+    ${HABITS.map(h=>`
+      <div class="habit">
+        <button class="checkbtn ${hab[h.id]?'on':''}" onclick="toggleHabit('${h.id}')">${hab[h.id]?'✓':''}</button>
+        <span>${h.emo} ${h.name}</span>
+      </div>`).join('')}
+    <p class="sub">Každý návyk = +5 XP. Návyky drží streak i v netréninkové dny. Protein a pohyb se odškrtávají samy.</p>
+  </div>`;
+}
+function toggleHabit(id){
+  const t=today();
+  S.habits[t]=S.habits[t]||{};
+  if(S.habits[t][id]){ S.habits[t][id]=false; S.xp=Math.max(0,S.xp-5); save(); }
+  else { S.habits[t][id]=true; addXp(5,'Návyk splněn! +5 XP'); checkAch(); }
+  render();
+}
+
+/* =====================================================
+   TRÉNINK tab
+   ===================================================== */
+let exFilter='all';
+function exName(id){ const e=EXERCISES.find(x=>x.id===id); return e?e.name:''; }
+function renderTrain(){
+  const plan = planFor(S.profile);
+  const wk = nextWorkoutKey();
+  const all = [...EXERCISES, ...S.customEx];
+  const list = exFilter==='all'? all : all.filter(e=>e.cat===exFilter);
+  app.innerHTML = `
+  <h1>Trénink 🏋️</h1>
+
+  <div class="card wood">
+    <div class="row"><h2 class="grow" style="margin:0">Tvůj plán na míru</h2><span class="pill g">${LVLN[S.profile.level]}</span></div>
+    <p class="sub">${plan.days} · ${plan.reps}</p>
+    <p class="sub">${plan.note}</p>
+    ${['A','B','C'].map(k=>`
+      <div class="divider"></div>
+      <div class="row">
+        <h3 class="grow" style="margin:0">Trénink ${k} ${k===wk?'<span class="pill g">další na řadě</span>':''}</h3>
+      </div>
+      <p class="sub" style="margin:4px 0 0">${plan[k].map(e=>e.emo+' '+e.name).join(' · ')}</p>
+    `).join('')}
+    <div style="height:14px"></div>
+    <button class="btn" onclick="startWorkout()">Začít trénink ${wk} ▶</button>
+    <div style="height:8px"></div>
+    <button class="btn sec" onclick="startEmptyWorkout()">Volný trénink (vyberu si cviky)</button>
+  </div>
+
+  <div class="card">
+    <h2>Knihovna cviků</h2>
+    <div class="seg" style="margin-bottom:10px">
+      ${['all','push','pull','legs','core'].map(c=>`<button class="${exFilter===c?'on':''}" onclick="exFilter='${c}';renderTrain()">${c==='all'?'Vše':CATS[c]}</button>`).join('')}
+    </div>
+    <div class="list">
+      ${list.map(e=>`
+        <div class="item">
+          <div class="emo">${e.emo}</div>
+          <div class="grow">
+            <b>${e.name}</b> <span class="pill">${CATS[e.cat]||'Vlastní'}</span> ${e.lvl!==undefined?`<span class="pill ${e.lvl>=3?'r':e.lvl===2?'o':e.lvl===1?'b':''}">${LVLN[e.lvl]}</span>`:''}
+            <div class="sub" style="margin:3px 0 0">${e.tip||''}</div>
+            ${(e.easier||e.harder)?`<div class="sub" style="margin:2px 0 0">${e.easier?'⬇️ Lehčí: '+exName(e.easier):''}${e.easier&&e.harder?' · ':''}${e.harder?'⬆️ Těžší: '+exName(e.harder):''}</div>`:''}
+          </div>
+          ${e.own?`<div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn sm sec" onclick="openAddEx('${e.id}')">✎</button>
+            <button class="btn sm danger" onclick="delCustomEx('${e.id}')">✕</button></div>`:''}
+        </div>`).join('')}
+    </div>
+    <div style="height:10px"></div>
+    <button class="btn ghost" onclick="openAddEx()">+ Přidat vlastní cvik</button>
+  </div>`;
+}
+function openAddEx(editId){
+  const ex = editId ? S.customEx.find(e=>e.id===editId) : null;
+  pendingEmo = ex ? ex.emo : '⭐';
+  const sel = (v,x)=> v===x?'selected':'';
+  modal(`
+    <h2>${ex?'Upravit cvik':'Vlastní cvik'}</h2>
+    <label>Ikona</label>${emoPicker(EX_EMOJIS, pendingEmo)}
+    <label>Název</label><input id="cxName" placeholder="např. Typewriter shyby" value="${ex?ex.name:''}">
+    <label>Kategorie</label>
+    <select id="cxCat">
+      <option value="push" ${ex?sel(ex.cat,'push'):''}>Tlaky</option>
+      <option value="pull" ${ex?sel(ex.cat,'pull'):''}>Tahy</option>
+      <option value="legs" ${ex?sel(ex.cat,'legs'):''}>Nohy</option>
+      <option value="core" ${ex?sel(ex.cat,'core'):''}>Core</option>
+      <option value="full" ${ex?sel(ex.cat,'full'):''}>Celé tělo</option></select>
+    <label>Měří se v</label>
+    <select id="cxUnit">
+      <option value="r" ${ex?sel(ex.unit,'r'):''}>opakováních</option>
+      <option value="s" ${ex?sel(ex.unit,'s'):''}>sekundách (výdrž)</option></select>
+    <label>Poznámka k technice (nepovinné)</label>
+    <textarea id="cxTip" placeholder="Na co si dát pozor...">${ex?(ex.tip||''):''}</textarea>
+    <div style="height:14px"></div>
+    <button class="btn" onclick="saveCustomEx('${editId||''}')">Uložit cvik</button>`);
+}
+function saveCustomEx(editId){
+  const n=document.getElementById('cxName').value.trim();
+  if(!n){ toast('Doplň název'); return; }
+  const data={name:n, emo:pendingEmo||'⭐',
+    cat:document.getElementById('cxCat').value,
+    unit:document.getElementById('cxUnit').value,
+    tip:document.getElementById('cxTip').value.trim(), own:true};
+  const ex = editId ? S.customEx.find(e=>e.id===editId) : null;
+  if(ex){ Object.assign(ex,data); save(); closeModal(); toast('Cvik upraven ✅'); }
+  else { S.customEx.push({id:'cx'+Date.now(), ...data});
+    save(); closeModal(); addXp(10,'Nový cvik! +10 XP'); checkAch(); }
+  renderTrain();
+}
+function delCustomEx(id){ S.customEx=S.customEx.filter(e=>e.id!==id); save(); renderTrain(); }
+
+/* =====================================================
+   AKTIVNÍ TRÉNINK
+   ===================================================== */
+function startWorkout(){
+  const plan = planFor(S.profile);
+  const wk = nextWorkoutKey();
+  S.active = { key:wk, started:Date.now(),
+    ex: plan[wk].map(e=>({id:e.id,name:e.name,emo:e.emo,unit:e.unit||'r',sets:[],done:false})) };
+  save(); go('workout');
+}
+function startEmptyWorkout(){
+  S.active = { key:'Volný', started:Date.now(), ex:[] };
+  save(); go('workout');
+}
+let restEnd=null, restInt=null;
+function renderWorkout(){
+  const a=S.active; if(!a){ go('home'); return; }
+  const mins = Math.floor((Date.now()-a.started)/60000);
+  app.innerHTML = `
+  <h1>Trénink ${a.key} 🔥</h1>
+  <p class="sub">Běží ${mins} min · ${a.ex.reduce((s,e)=>s+e.sets.length,0)} sérií hotovo</p>
+
+  <div class="card flat">
+    <details>
+      <summary>🤸 Rozcvička (2-3 min) - neflákej ji, chrání ramena</summary>
+      <div class="warmup">
+        ${WARMUP.map((w,i)=>`<label><input type="checkbox"> ${w}</label>`).join('')}
+      </div>
+    </details>
+  </div>
+
+  <div class="card flat">
+    <div class="row">
+      <div class="grow"><b>⏱️ Pauza mezi sériemi</b><div class="sub resttimer" id="restShow">připraveno</div></div>
+      <button class="btn sm sec" onclick="startRest(60)">60 s</button>
+      <button class="btn sm sec" onclick="startRest(90)">90 s</button>
+    </div>
+  </div>
+
+  ${a.ex.map((e,i)=>{
+    const ls=lastSets(e.name);
+    return `
+    <div class="card flat ${e.done?'exdone':''}">
+      <div class="row">
+        <div class="emo">${e.emo}</div>
+        <h3 class="grow" style="margin:0">${e.name} <span class="pill">${e.unit==='s'?'sekundy':'opakování'}</span></h3>
+        <button class="checkbtn ${e.done?'on':''}" onclick="toggleExDone(${i})">${e.done?'✓':''}</button>
+      </div>
+      ${ls?`<div class="minule">🪵 Minule (${fmtD(ls.date)}): ${ls.sets.join(' · ')}${ls.unit==='s'?' s':''} → zkus o kousek víc!</div>`:''}
+      ${e.sets.map((s,si)=>`
+        <div class="setrow">
+          <div class="n">${si+1}</div>
+          <input type="number" inputmode="numeric" value="${s.reps}" onchange="setReps(${i},${si},this.value)">
+          <span class="mut" style="font-size:13px">${e.unit==='s'?'sek.':'opak.'}</span>
+          <button class="btn sm danger" onclick="delSet(${i},${si})">✕</button>
+        </div>`).join('')}
+      <div style="height:6px"></div>
+      <button class="btn sm sec" onclick="addSet(${i})">+ série</button>
+    </div>`;}).join('')}
+
+  <button class="btn ghost" onclick="openPickEx()">+ Přidat cvik do tréninku</button>
+  <div style="height:10px"></div>
+  <button class="btn" onclick="openFinish()">Dokončit trénink ✅</button>
+  <div style="height:8px"></div>
+  <button class="btn danger" onclick="cancelWorkout()">Zrušit trénink</button>
+  <div style="height:20px"></div>`;
+  tickRest();
+}
+function startRest(s){ restEnd=Date.now()+s*1000;
+  clearInterval(restInt); restInt=setInterval(tickRest,250); tickRest(); }
+function tickRest(){
+  const el=document.getElementById('restShow'); if(!el) return;
+  if(!restEnd){ el.textContent='připraveno'; return; }
+  const left=Math.ceil((restEnd-Date.now())/1000);
+  if(left<=0){ el.textContent='✅ Jedeme další sérii!'; clearInterval(restInt); restEnd=null;
+    if(navigator.vibrate) navigator.vibrate(300); return; }
+  el.textContent=left+' s';
+}
+function addSet(i){
+  const e=S.active.ex[i];
+  const ls=lastSets(e.name);
+  let val;
+  if(ls && ls.sets[e.sets.length]!==undefined) val=ls.sets[e.sets.length];
+  else if(e.sets.length) val=e.sets[e.sets.length-1].reps;
+  else val=(e.unit==='s'?30:10);
+  e.sets.push({reps:val}); save(); renderWorkout();
+}
+function setReps(i,si,v){ S.active.ex[i].sets[si].reps=Math.max(0,+v||0); save(); }
+function delSet(i,si){ S.active.ex[i].sets.splice(si,1); save(); renderWorkout(); }
+function toggleExDone(i){ const e=S.active.ex[i]; e.done=!e.done; save(); renderWorkout(); }
+function openPickEx(){
+  const all=[...EXERCISES,...S.customEx];
+  modal(`<h2>Přidat cvik</h2><div class="list">
+    ${all.map(e=>`<div class="item" style="cursor:pointer" onclick="pickEx('${e.id}')">
+      <div class="emo">${e.emo}</div><div class="grow"><b>${e.name}</b>
+      <div class="sub">${CATS[e.cat]||''}</div></div><span class="acc" style="font-weight:800">+</span></div>`).join('')}
+  </div>`);
+}
+function pickEx(id){
+  const e=[...EXERCISES,...S.customEx].find(x=>x.id===id);
+  S.active.ex.push({id:e.id,name:e.name,emo:e.emo,unit:e.unit||'r',sets:[],done:false});
+  save(); closeModal(); renderWorkout();
+}
+function cancelWorkout(){
+  if(confirm('Fakt zrušit trénink? Nic se neuloží.')){ S.active=null; save(); go('home'); }
+}
+let pendingFeel=null;
+function openFinish(){
+  pendingFeel=null;
+  modal(`<h2>Jak ses cítil? 🧠</h2>
+    <p class="sub">Pocit z tréninku pomáhá sledovat formu a předejít přepálení.</p>
+    <div class="feelrow" id="feelrow">
+      ${['😵','😮‍💨','🙂','💪','🤩'].map((f,i)=>`<button onclick="setFeel(${i+1},this)">${f}</button>`).join('')}
+    </div>
+    <button class="btn" onclick="finishWorkout()">Uložit trénink ⚡</button>`);
+}
+function setFeel(v,btn){ pendingFeel=v;
+  document.querySelectorAll('#feelrow button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function finishWorkout(){
+  const a=S.active;
+  const sets=a.ex.reduce((s,e)=>s+e.sets.length,0);
+  if(!sets){ toast('Zapiš aspoň jednu sérii 😅'); return; }
+  const mins=Math.max(1,Math.round((Date.now()-a.started)/60000));
+  const xp = 50 + sets*5 + Math.min(20,mins);
+  S.workouts.push({date:today(), key:a.key, mins, sets,
+    feel:pendingFeel,
+    ex:a.ex.filter(e=>e.sets.length).map(e=>({name:e.name,emo:e.emo,unit:e.unit||'r',sets:e.sets.map(s=>s.reps)}))});
+  S.active=null;
+  const t=today(); S.habits[t]=S.habits[t]||{}; S.habits[t].move=true;
+  save();
+  closeModal(); confetti();
+  addXp(xp,'Trénink hotový! +'+xp+' XP');
+  go('home');
+  checkAch();
+}
+
+/* =====================================================
+   JÍDLO
+   ===================================================== */
+let foodFilter='pre';
+function renderFood(){
+  const nut=nutrition();
+  const log=S.foodLog[today()]||[];
+  const eaten=log.reduce((s,f)=>s+f.p,0), kcalE=log.reduce((s,f)=>s+(f.kcal||0),0);
+  const water=S.water[today()]||0;
+  const all=[...MEALS,...S.customMeals];
+  const list=all.filter(m=>foodFilter==='all'?true:m.when===foodFilter);
+  app.innerHTML=`
+  <h1>Jídlo 🍗</h1>
+  <div class="card wood">
+    <div class="row"><h2 class="grow" style="margin:0">Dnešní příjem</h2>
+      <span class="pill ${eaten>=nut.protein?'g':''}">${eaten}/${nut.protein} g protein</span></div>
+    <div style="height:8px"></div>
+    <div class="progressbar"><div style="width:${Math.min(100,eaten/nut.protein*100)}%"></div></div>
+    <p class="sub" style="margin-top:8px">${kcalE} kcal zapsáno · denní cíl cca ${nut.kcal} kcal
+    (${S.profile.goal==='gain'?'nabírání: lehký nadbytek':S.profile.goal==='lose'?'hubnutí: lehký deficit':'udržování'})</p>
+    ${log.length?`<div class="divider"></div><div class="list">
+      ${log.map((f,i)=>`<div class="item"><div class="emo">${f.emo||'🍽️'}</div>
+        <div class="grow"><b>${f.name}</b><div class="sub">${f.p} g protein · ${f.kcal||'?'} kcal</div></div>
+        <button class="btn sm danger" onclick="delFood(${i})">✕</button></div>`).join('')}
+    </div>`:''}
+  </div>
+
+  <div class="card flat">
+    <div class="row"><h3 class="grow" style="margin:0">💧 Voda dnes</h3><span class="pill ${water>=8?'b':''}">${water}/8</span></div>
+    <div class="glassrow">
+      ${[1,2,3,4,5,6,7,8].map(i=>`<button class="${water>=i?'full':''}" onclick="setWater(${i})">💧</button>`).join('')}
+    </div>
+    <p class="sub">Cíl 8 sklenic (cca 2 l). V tréninkový den klidně víc.</p>
+  </div>
+
+  <div class="card flat" style="border-color:var(--accD)">
+    <h3>⏰ Pravidla kolem tréninku</h3>
+    <p class="sub">• 1-2 h před tréninkem: sacharidy + bílkoviny (energie)<br>
+    • Do 30-60 min po tréninku: protein (regenerace a růst)<br>
+    • Denně: ${nut.protein} g bílkovin (${S.profile.goal==='fit'?'1,6':'2,0'} g na kilo váhy)</p>
+  </div>
+
+  <div class="card">
+    <h2>Jídla</h2>
+    <div class="seg" style="margin-bottom:10px">
+      ${[['pre','Před'],['post','Po'],['any','Kdykoliv'],['all','Vše']].map(c=>
+        `<button class="${foodFilter===c[0]?'on':''}" onclick="foodFilter='${c[0]}';renderFood()">${c[1]}</button>`).join('')}
+    </div>
+    <div class="list">
+      ${list.map(m=>`<div class="item">
+        <div class="emo">${m.emo}</div>
+        <div class="grow"><b>${m.name}</b> <span class="pill ${m.when==='pre'?'b':m.when==='post'?'g':''}">${WHEN[m.when]}</span>
+          <div class="sub" style="margin:3px 0 0">${m.p} g protein · ${m.kcal} kcal${m.note?' · '+m.note:''}</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn sm sec" onclick="eat('${m.id}')">Snědl 🍴</button>
+          ${m.own?`<button class="btn sm sec" onclick="openAddMeal('${m.id}')">✎</button>
+          <button class="btn sm danger" onclick="delCustomMeal('${m.id}')">✕</button>`:''}
+        </div>
+      </div>`).join('')}
+    </div>
+    <div style="height:10px"></div>
+    <button class="btn ghost" onclick="openAddMeal()">+ Přidat vlastní jídlo</button>
+  </div>`;
+}
+function setWater(n){
+  const t=today();
+  const cur=S.water[t]||0;
+  S.water[t]=(n===cur)?n-1:n;
+  if(S.water[t]>cur) addXp((S.water[t]-cur)*2,'Hydratace! +'+(S.water[t]-cur)*2+' XP');
+  else save();
+  renderFood();
+}
+function eat(id){
+  const m=[...MEALS,...S.customMeals].find(x=>x.id===id);
+  const t=today(); S.foodLog[t]=S.foodLog[t]||[];
+  S.foodLog[t].push({name:m.name,emo:m.emo,p:m.p,kcal:m.kcal});
+  save();
+  const nut=nutrition();
+  const eaten=S.foodLog[t].reduce((s,f)=>s+f.p,0);
+  S.habits[t]=S.habits[t]||{};
+  if(eaten>=nut.protein && !S.habits[t].protein){
+    S.habits[t].protein=true;
+    addXp(8,'Protein splněn! Návyk odškrtnut. +8 XP');
+  } else {
+    addXp(3,'Zapsáno! +3 XP');
+  }
+  checkAch(); renderFood();
+}
+function delFood(i){ S.foodLog[today()].splice(i,1); save(); renderFood(); }
+function openAddMeal(editId){
+  const m = editId ? S.customMeals.find(x=>x.id===editId) : null;
+  pendingEmo = m ? m.emo : '🍽️';
+  const sel = (v,x)=> v===x?'selected':'';
+  modal(`<h2>${m?'Upravit jídlo':'Vlastní jídlo'}</h2>
+    <label>Ikona</label>${emoPicker(MEAL_EMOJIS, pendingEmo)}
+    <label>Název</label><input id="cmName" placeholder="např. Mamčina svíčková" value="${m?m.name:''}">
+    <div class="grid2">
+      <div><label>Protein (g)</label><input id="cmP" type="number" inputmode="numeric" placeholder="30" value="${m?m.p:''}"></div>
+      <div><label>Kalorie (kcal)</label><input id="cmK" type="number" inputmode="numeric" placeholder="550" value="${m?(m.kcal||''):''}"></div>
+    </div>
+    <label>Kdy</label>
+    <select id="cmWhen">
+      <option value="any" ${m?sel(m.when,'any'):''}>Kdykoliv</option>
+      <option value="pre" ${m?sel(m.when,'pre'):''}>Před tréninkem</option>
+      <option value="post" ${m?sel(m.when,'post'):''}>Po tréninku</option></select>
+    <div style="height:14px"></div>
+    <button class="btn" onclick="saveCustomMeal('${editId||''}')">Uložit jídlo</button>`);
+}
+function saveCustomMeal(editId){
+  const n=document.getElementById('cmName').value.trim();
+  const p=+document.getElementById('cmP').value;
+  if(!n||!p){ toast('Doplň název a protein'); return; }
+  const data={name:n, emo:pendingEmo||'🍽️', p,
+    kcal:+document.getElementById('cmK').value||0,
+    when:document.getElementById('cmWhen').value, own:true};
+  const m = editId ? S.customMeals.find(x=>x.id===editId) : null;
+  if(m){ Object.assign(m,data); save(); closeModal(); toast('Jídlo upraveno ✅'); }
+  else { S.customMeals.push({id:'cm'+Date.now(), ...data});
+    save(); closeModal(); addXp(5,'Nové jídlo! +5 XP'); }
+  renderFood();
+}
+function delCustomMeal(id){ S.customMeals=S.customMeals.filter(m=>m.id!==id); save(); renderFood(); }
+
+/* =====================================================
+   PROGRES
+   ===================================================== */
+function renderProgress(){
+  const p=S.profile;
+  const lastTest=S.maxTests[S.maxTests.length-1];
+  const testDue=!lastTest||daysBetween(lastTest.date,today())>=14;
+  const w=latestWeight();
+  const wDiff = p.targetWeight - w;
+  const histo = S.workouts.map((wo,i)=>({wo,i})).reverse().slice(0,15);
+  app.innerHTML=`
+  <h1>Progres 📈</h1>
+
+  <div class="grid2">
+    <div class="statmini"><div class="v">${S.workouts.length}</div><div class="l">tréninků celkem</div></div>
+    <div class="statmini"><div class="v">${S.workouts.reduce((s,x)=>s+x.sets,0)}</div><div class="l">sérií celkem</div></div>
+  </div>
+
+  <div class="card wood">
+    <div class="row"><h2 class="grow" style="margin:0">🏆 Max testy</h2>
+      ${testDue?'<span class="pill o">je čas na test!</span>':`<span class="pill">další za ${14-daysBetween(lastTest.date,today())} dní</span>`}</div>
+    <p class="sub">Jednou za 2 týdny: max kliky, shyby a dipy v jedné sérii.</p>
+    ${S.maxTests.length?chartMax():'<p class="sub">Zatím žádný test. Dej první, ať máš startovní čáru! 🏁</p>'}
+    <div style="height:8px"></div>
+    <button class="btn ${testDue?'':'sec'}" onclick="openMaxTest()">Zapsat max test</button>
+  </div>
+
+  <div class="card">
+    <div class="row"><h2 class="grow" style="margin:0">⚖️ Váha</h2>
+      <span class="pill ${Math.abs(wDiff)<1?'g':''}">${w} kg → cíl ${p.targetWeight} kg</span></div>
+    ${S.weights.length>1?chartWeight():'<p class="sub">Zapisuj váhu cca 1x týdně, ráno nalačno.</p>'}
+    <div class="row" style="margin-top:10px">
+      <input id="wIn" type="number" inputmode="decimal" placeholder="váha v kg" style="flex:1">
+      <button class="btn sm" style="width:auto" onclick="logWeight()">Zapsat</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏅 Odznaky (${S.ach.length}/${ACH.length})</h2>
+    <div class="achgrid">
+      ${ACH.map(a=>{
+        const has=S.ach.includes(a.id);
+        return `<div class="ach ${has?'':'lock'}"><div class="e">${has?a.emo:'🔒'}</div><div class="n">${a.name}</div></div>`;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Historie tréninků</h2>
+    ${histo.length?`<div class="list">${histo.map(({wo,i})=>`
+      <div class="item">
+        <div class="emo">${wo.feel?['😵','😮‍💨','🙂','💪','🤩'][wo.feel-1]:'🏋️'}</div>
+        <div class="grow"><b>Trénink ${wo.key}</b> <span class="pill">${fmtD(wo.date)}</span>
+          <div class="sub" style="margin:2px 0 0">${wo.mins} min · ${wo.sets} sérií · ${wo.ex.map(e=>e.emo+' '+e.sets.join('/')+(e.unit==='s'?'s':'')).join(' · ')}</div>
+        </div>
+        <button class="btn sm danger" onclick="delWorkout(${i})">✕</button>
+      </div>`).join('')}</div>`
+    :'<p class="sub">Zatím prázdno. První trénink na tebe čeká v záložce Trénink. 💪</p>'}
+  </div>`;
+}
+function delWorkout(i){
+  if(confirm('Smazat tento trénink z historie?')){
+    S.workouts.splice(i,1); save(); renderProgress();
+  }
+}
+function logWeight(){
+  const v=+document.getElementById('wIn').value;
+  if(!v||v<30||v>250){ toast('Zadej reálnou váhu 🙂'); return; }
+  S.weights.push({date:today(),kg:v}); save();
+  addXp(5,'Váha zapsána! +5 XP'); checkAch(); renderProgress();
+}
+function openMaxTest(){
+  modal(`<h2>🏆 Max test</h2>
+    <p class="sub">Pořádně se rozcvič. Pak jedna série na maximum u každého cviku. Mezi cviky pauza 3-5 min.</p>
+    <label>🤜 Max kliky</label><input id="mtPush" type="number" inputmode="numeric" placeholder="0">
+    <label>🧗 Max shyby</label><input id="mtPull" type="number" inputmode="numeric" placeholder="0">
+    <label>🆙 Max dipy</label><input id="mtDip" type="number" inputmode="numeric" placeholder="0">
+    <div style="height:14px"></div>
+    <button class="btn" onclick="saveMaxTest()">Uložit test ⚡</button>`);
+}
+function saveMaxTest(){
+  const t={date:today(),
+    push:+document.getElementById('mtPush').value||0,
+    pull:+document.getElementById('mtPull').value||0,
+    dip:+document.getElementById('mtDip').value||0};
+  const prev=S.maxTests;
+  if(prev.length){
+    const best={push:Math.max(...prev.map(x=>x.push)), pull:Math.max(...prev.map(x=>x.pull)), dip:Math.max(...prev.map(x=>x.dip))};
+    if(t.push>best.push||t.pull>best.pull||t.dip>best.dip){ S.flags.pr=true; }
+  }
+  S.maxTests.push(t); save(); closeModal(); confetti();
+  addXp(40,'Max test hotový! +40 XP');
+  if(t.pull>=5 && S.profile.level<2) toast('5+ shybů! Zvaž vyšší úroveň v ⚙️ nastavení 😎');
+  go('progress');
+  checkAch();
+}
+/* ---------- SVG grafy ---------- */
+function lineChart(series, labels, colors, names){
+  const W=560,H=200,P=34;
+  const allV=series.flat();
+  const max=Math.max(5,...allV)*1.15, min=Math.max(0,Math.min(...allV)*0.85);
+  const n=labels.length;
+  const x=i=> n===1? W/2 : P+ i*(W-P-10)/(n-1);
+  const y=v=> H-26-(v-min)/(max-min)*(H-50);
+  let out=`<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:300px">`;
+  for(let g=0;g<4;g++){ const gy=24+g*(H-50)/3;
+    out+=`<line x1="${P}" y1="${gy}" x2="${W-10}" y2="${gy}" stroke="#2b3d2c" stroke-width="1"/>`; }
+  series.forEach((sv,si)=>{
+    const pts=sv.map((v,i)=>x(i)+','+y(v)).join(' ');
+    out+=`<polyline points="${pts}" fill="none" stroke="${colors[si]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    sv.forEach((v,i)=>{ out+=`<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${colors[si]}"/>
+      <text x="${x(i)}" y="${y(v)-9}" fill="${colors[si]}" font-size="11" font-weight="700" text-anchor="middle">${v}</text>`; });
+  });
+  labels.forEach((l,i)=>{ out+=`<text x="${x(i)}" y="${H-6}" fill="#9cab94" font-size="10.5" text-anchor="middle">${l}</text>`; });
+  out+='</svg></div>';
+  if(names) out+=`<p class="sub center" style="margin-top:4px">${names.map((nm,i)=>`<span style="color:${colors[i]};font-weight:700">● ${nm}</span>`).join(' &nbsp; ')}</p>`;
+  return out;
+}
+function chartMax(){
+  const t=S.maxTests.slice(-8);
+  return lineChart(
+    [t.map(x=>x.push),t.map(x=>x.pull),t.map(x=>x.dip)],
+    t.map(x=>fmtD(x.date)),
+    ['#8fc878','#86aec2','#d99a5b'],
+    ['Kliky','Shyby','Dipy']);
+}
+function chartWeight(){
+  const w=S.weights.slice(-10);
+  return lineChart([w.map(x=>x.kg)],w.map(x=>fmtD(x.date)),['#d9a441'],null);
+}
+
+/* =====================================================
+   PARTA
+   ===================================================== */
+function renderSquad(){
+  const ws=weekStats();
+  const me={name:S.profile.name, xp:S.xp, streak:S.streak.count,
+    lvl:levelInfo().cur.name, emo:levelInfo().cur.emo, wk:S.workouts.length, ww:ws.wk, me:true};
+  const rows=[me,...S.friends].sort((a,b)=>b.xp-a.xp);
+  app.innerHTML=`
+  <h1>Parta 👥</h1>
+  <p class="sub">Žebříček podle XP. Kdo maká, ten je nahoře. Žádné výmluvy. 😤</p>
+
+  <div class="card wood">
+    <h2>🏆 Žebříček</h2>
+    <p class="sub">😈 Týdenní výzva: kdo dá do neděle nejvíc tréninků?</p>
+    ${rows.map((f,i)=>`<div class="lb">
+      <div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</div>
+      <div class="avatar">${(f.name||'?')[0].toUpperCase()}</div>
+      <div class="grow"><b>${f.name}${f.me?' (ty)':''}</b>
+        <div class="sub">${f.emo||''} ${f.lvl||''} · ${f.wk||0} tréninků${f.ww!==undefined?' · tento týden '+f.ww:''} · 🔥 ${f.streak||0}</div></div>
+      <div style="text-align:right"><b class="acc">⚡ ${f.xp}</b>
+        ${!f.me?`<div><button class="btn sm danger" style="margin-top:4px" onclick="delFriend(${S.friends.indexOf(f)})">✕</button></div>`:''}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="card flat">
+    <h3>🔗 Pozvi kluky</h3>
+    <p class="sub">Pošli jim odkaz na appku, ať nejedou sólo.</p>
+    <button class="btn wood" onclick="shareApp()">Sdílet odkaz na appku 📲</button>
+  </div>
+
+  <div class="card">
+    <h2>📲 Jak to funguje s partou</h2>
+    <p class="sub">Appka běží každému v jeho mobilu (data jsou jen u tebe). Skóre si vyměňujete kódy:</p>
+    <p class="sub">1. Pošli klukům odkaz na appku, každý si projde dotazník<br>
+    2. Každý zkopíruje svůj kód níže a hodí ho do skupiny<br>
+    3. Kódy ostatních sem vložíš a máš žebříček<br>
+    4. Jednou za čas si pošlete nové kódy = aktualizace skóre</p>
+    <div class="divider"></div>
+    <h3>Můj kód</h3>
+    <div class="codebox" id="myCode">${myCode()}</div>
+    <div style="height:8px"></div>
+    <button class="btn sec" onclick="copyCode()">Zkopírovat můj kód 📋</button>
+    <div class="divider"></div>
+    <h3>Přidat / aktualizovat kámoše</h3>
+    <textarea id="frCode" placeholder="Sem vlož kód od kámoše..."></textarea>
+    <div style="height:8px"></div>
+    <button class="btn" onclick="addFriend()">Přidat do party ✚</button>
+  </div>`;
+}
+function myCode(){
+  const ws=weekStats();
+  const d={n:S.profile.name, x:S.xp, s:S.streak.count, w:S.workouts.length, ww:ws.wk,
+    l:levelInfo().cur.name, e:levelInfo().cur.emo};
+  return 'KALI.'+btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+}
+function copyCode(){
+  const c=myCode();
+  if(navigator.clipboard) navigator.clipboard.writeText(c).then(()=>toast('Zkopírováno! Pošli do skupiny 📲'));
+  else toast('Označ a zkopíruj kód ručně');
+}
+function addFriend(){
+  const raw=document.getElementById('frCode').value.trim();
+  if(!raw.startsWith('KALI.')){ toast('To nevypadá jako KaliSquad kód 🤔'); return; }
+  try{
+    const d=JSON.parse(decodeURIComponent(escape(atob(raw.slice(5)))));
+    if(!d.n) throw 0;
+    const f={name:d.n, xp:d.x||0, streak:d.s||0, wk:d.w||0, ww:d.ww, lvl:d.l||'', emo:d.e||''};
+    const ix=S.friends.findIndex(x=>x.name===f.name);
+    if(ix>=0) S.friends[ix]=f; else S.friends.push(f);
+    save(); toast(f.name+' je v partě! 🎉'); checkAch(); renderSquad();
+  }catch(e){ toast('Kód se nepodařilo načíst 😕'); }
+}
+function delFriend(i){ if(i<0)return; S.friends.splice(i,1); save(); renderSquad(); }
+function shareApp(){
+  const url=location.href.split('#')[0];
+  const text='Pojď cvičit kalisteniku s náma v KaliSquad 💪 '+url;
+  if(navigator.share){ navigator.share({title:'KaliSquad', text:'Pojď cvičit kalisteniku s náma 💪', url}).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>toast('Odkaz zkopírován! Pošli klukům 📲')); }
+  else prompt('Zkopíruj odkaz:', url);
+}
+
+/* =====================================================
+   MODAL
+   ===================================================== */
+function modal(html, hideClose){
+  closeModal();
+  const bg=document.createElement('div'); bg.className='modalBg'; bg.id='modalBg';
+  bg.onclick=e=>{ if(e.target===bg) closeModal(); };
+  bg.innerHTML=`<div class="modal">${html}${hideClose?'':'<div style="height:6px"></div><button class="btn ghost" onclick="closeModal()">Zavřít</button>'}</div>`;
+  document.body.appendChild(bg);
+}
+function closeModal(){ const m=document.getElementById('modalBg'); if(m) m.remove(); }
+
+/* ---------- start ---------- */
+render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
